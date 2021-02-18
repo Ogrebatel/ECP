@@ -68,13 +68,11 @@ class Point:
         result = Point()
         result.set(0, 0, self.curve)
         m2 = self
-        while n > 0:
+        while n:
             if n & 1 == 1:
                 result = result + m2
-                pass
             n = n >> 1
             m2 = m2 + m2
-            pass
         return result
 
 class ECP:
