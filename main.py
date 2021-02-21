@@ -6,7 +6,6 @@
  Дискриминант: -16(4a^3 + 27b^2)
  P + Q = R
  P + 0 = 0 + P = P
-
 """
 
 
@@ -20,7 +19,8 @@ class EllipticCurve:
         self.b = bIn
         self.p = pIn
 
-
+def inv(x, p):
+    return pow(x, p - 2, p)
 
 class Point:
     x = int(0)
@@ -35,8 +35,6 @@ class Point:
     def print(self):
         print(self.x, self.y)
 
-    def inv(self, x):
-        return pow(x, self.curve.p - 2, self.curve.p)
 
     def __add__(self, other):
         result = Point()
@@ -57,9 +55,9 @@ class Point:
         if (self.x == other.x) and (self.y == other.y):
             if self.y == 0:
                 print("gg2")
-            alpha = ((3 * self.x * self.x + self.curve.a) * self.inv(2 * self.y)) % self.curve.p
+            alpha = ((3 * self.x * self.x + self.curve.a) * inv(2 * self.y, self.curve.p)) % self.curve.p
         else:
-            alpha = ((other.y - self.y) * self.inv(other.x - self.x)) % self.curve.p
+            alpha = ((other.y - self.y) * inv(other.x - self.x, self.curve.p)) % self.curve.p
         result.x = (alpha * alpha - self.x - other.x) % self.curve.p
         result.y = (-self.y + alpha * (self.x - result.x)) % self.curve.p
         return result
@@ -106,7 +104,33 @@ class ECP:
                 r = C.x % self.q
             s = (r * d + k * e) % self.q
             print(s)
-        return str(r) + str(s)
+        return r, s
+
+    def verify(self, msg, sig: int()):
+        r = sig[0]
+        s = sig[1]
+
+        if not((0 < r < self.q) and (0 < s < self.q)):
+            return IOError
+
+
+        # alpha = hash(msg)
+        e = 0x2DFBC1B372D89A1188C09C52E0EEC61FCE52032AB1022E8E67ECE6672B043EE5  # e = alpha % q
+        if (e == 0):
+            e = 1
+
+        v = inv(e, self.q)
+
+        z1 = (s * v) % self.q
+        z2 = (-r * v) % self.q
+
+        C = self.P.mul(z1) + self.Q.mul(z2)
+        R = C.x % q
+
+        if r == R:
+            return True
+        else:
+            return False
 
 
 if __name__ == '__main__':
@@ -130,9 +154,10 @@ if __name__ == '__main__':
     k = 0x77105C9B20BCD3122823C8CF6FCC7B956DE33814E95B7FE64FED924594DCEAB3
     d = int(0x7A929ADE789BB9BE10ED359DD39A72C11B60961F49397EEE1D19CE9891EC3B28)
     test = ECP(P, Q, curve, q)
-
-    print(test.signature(d))
-
+    sig = test.signature(d)
+    print(sig)
+    msg = str("asdasd")
+    print(test.verify(msg, sig))
     '''
     xp = 2
     yp = 4018974056539037503335449422937059775635739389905545080690979365213431566280
