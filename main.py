@@ -62,7 +62,7 @@ class Point:
         result.y = (-self.y + alpha * (self.x - result.x)) % self.curve.p
         return result
 
-    def mul(self, n):
+    def __mul__(self, n: int):
         result = Point()
         result.set(0, 0, self.curve)
         m2 = self
@@ -100,7 +100,7 @@ class ECP:
 
         while (s == 0):
             while (r == 0):
-                C = P.mul(k)
+                C = P * k
                 r = C.x % self.q
             s = (r * d + k * e) % self.q
             print(s)
@@ -124,7 +124,7 @@ class ECP:
         z1 = (s * v) % self.q
         z2 = (-r * v) % self.q
 
-        C = self.P.mul(z1) + self.Q.mul(z2)
+        C = self.P * z1 + self.Q * z2
         R = C.x % q
 
         if r == R:
